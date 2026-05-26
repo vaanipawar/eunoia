@@ -1,5 +1,3 @@
-# backend/app/services/chatbot.py
-
 import requests
 import json
 from app.core.config import settings

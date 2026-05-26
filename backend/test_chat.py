@@ -1,4 +1,4 @@
-# backend/test_chat.py  — run this standalone to verify everything works
+
 import sys
 sys.path.insert(0, ".")
 from app.services.chatbot import chat, generate_session_summary

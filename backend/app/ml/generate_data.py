@@ -17,7 +17,7 @@ def generate_student_data(n=500, seed=42):
         "lms_time_hours":       np.random.normal(10, 5, n).clip(0, 40),
     })
 
-    # Burnout label — weighted combination of risk factors
+   
     risk = (
         (100 - df["attendance_pct"]) * 0.25 +
         (100 - df["assignment_completion"]) * 0.20 +

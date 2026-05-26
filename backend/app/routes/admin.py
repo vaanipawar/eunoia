@@ -5,6 +5,7 @@ from app.core.auth import get_current_user
 from app.models.user import User, UserRole
 from app.models.burnout import BurnoutScore
 from app.models.chat import ChatSession
+from typing import Optional
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -187,3 +188,39 @@ def run_predictions_manually(
     from app.tasks.prediction_tasks import run_weekly_predictions
     run_weekly_predictions.delay()
     return {"message": "Predictions triggered"}
+from pydantic import BaseModel
+
+class UpdateStudentRequest(BaseModel):
+    full_name: Optional[str] = None
+    department: Optional[str] = None
+    year_of_study: Optional[str] = None
+    phone: Optional[str] = None
+    is_active: Optional[bool] = None
+
+@router.patch("/students/{student_id}")
+def update_student(
+    student_id: str,
+    body: UpdateStudentRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_admin)
+):
+    student = db.query(User).filter(
+        User.id == student_id,
+        User.role == UserRole.student
+    ).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    if body.full_name is not None:
+        student.full_name = body.full_name
+    if body.department is not None:
+        student.department = body.department
+    if body.year_of_study is not None:
+        student.year_of_study = body.year_of_study
+    if body.phone is not None:
+        student.phone = body.phone
+    if body.is_active is not None:
+        student.is_active = body.is_active
+
+    db.commit()
+    return {"message": "Student updated successfully"}

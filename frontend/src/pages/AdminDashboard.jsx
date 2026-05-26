@@ -1,8 +1,50 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
 import RiskBadge from '../components/RiskBadge'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts'
-import { Users, AlertTriangle, CheckCircle, TrendingDown, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+
+const DEPARTMENTS = [
+  'Computer Engineering',
+  'Information Technology',
+  'Electronics & Communication Engineering',
+  'Electrical Engineering',
+  'Mechanical Engineering',
+  'Civil Engineering',
+  'Chemical Engineering',
+  'Automobile Engineering',
+  'Aerospace Engineering',
+  'Biomedical Engineering',
+  'Production Engineering',
+  'Instrumentation Engineering',
+  'BCA - Bachelor of Computer Applications',
+  'MCA - Master of Computer Applications',
+  'MBA - Master of Business Administration',
+  'BBA - Bachelor of Business Administration',
+  'B.Sc Computer Science',
+  'B.Sc Information Technology',
+  'B.Sc Physics',
+  'B.Sc Chemistry',
+  'B.Sc Mathematics',
+  'M.Sc Computer Science',
+  'BA - Bachelor of Arts',
+  'MA - Master of Arts',
+  'BA English',
+  'BA Psychology',
+  'BA Sociology',
+  'BA Economics',
+  'B.Com - Bachelor of Commerce',
+  'M.Com - Master of Commerce',
+  'MBBS',
+  'BDS - Dental',
+  'B.Pharmacy',
+  'M.Pharmacy',
+  'Nursing',
+  'LLB - Bachelor of Laws',
+  'LLM - Master of Laws',
+  'B.Arch - Architecture',
+  'B.Des - Design',
+  'Other',
+]
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('overview')
@@ -13,6 +55,11 @@ export default function AdminDashboard() {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [studentHistory, setStudentHistory] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  // Edit student states
+  const [editStudent, setEditStudent] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [editLoading, setEditLoading] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -32,6 +79,32 @@ export default function AdminDashboard() {
       const res = await api.get(`/api/admin/students/${studentId}/history`)
       setStudentHistory(res.data)
     } catch { setStudentHistory(null) }
+  }
+
+  const openEdit = (student) => {
+    setEditStudent(student)
+    setEditForm({
+      full_name: student.full_name || '',
+      department: student.department || '',
+      year_of_study: student.year_of_study || '',
+      phone: student.phone || '',
+      is_active: student.is_active !== false,
+    })
+  }
+
+  const saveEdit = async () => {
+    setEditLoading(true)
+    try {
+      await api.patch(`/api/admin/students/${editStudent.id}`, editForm)
+      setStudents(prev => prev.map(s =>
+        s.id === editStudent.id ? { ...s, ...editForm } : s
+      ))
+      setEditStudent(null)
+    } catch {
+      alert('Failed to update student')
+    } finally {
+      setEditLoading(false)
+    }
   }
 
   const approveMentor = async (mentorId) => {
@@ -68,8 +141,13 @@ export default function AdminDashboard() {
   })
   const deptData = Object.values(deptMap)
   const filtered = filter === 'all' ? students : students.filter(s => s.risk_level === filter)
-
   const tabs = ['overview', 'students', 'mentors', 'pending']
+
+  const inputStyle = {
+    width: '100%', padding: '9px 12px', borderRadius: 8,
+    border: '1px solid var(--border)', fontSize: 13,
+    fontFamily: 'var(--font-sans)', outline: 'none', background: 'var(--cream)',
+  }
 
   return (
     <div>
@@ -109,7 +187,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 24, borderBottom: '1px solid var(--border)', paddingBottom: 0 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 24, borderBottom: '1px solid var(--border)' }}>
         {tabs.map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '9px 18px', borderRadius: '8px 8px 0 0',
@@ -130,11 +208,11 @@ export default function AdminDashboard() {
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
             {[
-              { label: 'Total students', value: counts.total, color: 'var(--sage-light)', icon: '👥' },
-              { label: 'High risk', value: counts.high, color: 'var(--red-light)', icon: '🚨' },
-              { label: 'Medium risk', value: counts.medium, color: 'var(--amber-light)', icon: '⚠️' },
-              { label: 'Low risk', value: counts.low, color: 'var(--green-light)', icon: '✅' },
-            ].map(({ label, value, color, icon }) => (
+              { label: 'Total students', value: counts.total, icon: '👥' },
+              { label: 'High risk', value: counts.high, icon: '🚨' },
+              { label: 'Medium risk', value: counts.medium, icon: '⚠️' },
+              { label: 'Low risk', value: counts.low, icon: '✅' },
+            ].map(({ label, value, icon }) => (
               <div key={label} style={{
                 background: 'white', border: '1px solid var(--border)',
                 borderRadius: 12, padding: '18px 20px',
@@ -150,7 +228,7 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={deptData} barSize={18}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="dept" tick={{ fontSize: 12, fill: 'var(--muted)' }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="dept" tick={{ fontSize: 10, fill: 'var(--muted)' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12, fill: 'var(--muted)' }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', fontSize: 13 }} />
                 <Bar dataKey="high" name="High" fill="#DC2626" radius={[4, 4, 0, 0]} />
@@ -201,13 +279,20 @@ export default function AdminDashboard() {
                     <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--muted)' }}>
                       {s.last_assessed ? new Date(s.last_assessed).toLocaleDateString('en-IN') : 'Never'}
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ padding: '12px 16px', display: 'flex', gap: 6 }}>
                       <button onClick={() => openStudentHistory(s.id)} style={{
-                        fontSize: 12, padding: '4px 12px', borderRadius: 6,
+                        fontSize: 12, padding: '4px 10px', borderRadius: 6,
                         background: 'var(--sage-light)', color: 'var(--sage-dark)',
                         border: 'none', cursor: 'pointer', fontWeight: 500,
                       }}>
-                        View history
+                        History
+                      </button>
+                      <button onClick={() => openEdit(s)} style={{
+                        fontSize: 12, padding: '4px 10px', borderRadius: 6,
+                        background: 'var(--amber-light)', color: 'var(--amber)',
+                        border: 'none', cursor: 'pointer', fontWeight: 500,
+                      }}>
+                        Edit
                       </button>
                     </td>
                   </tr>
@@ -345,11 +430,9 @@ export default function AdminDashboard() {
                 background: 'none', border: 'none', cursor: 'pointer', fontSize: 20,
               }}>×</button>
             </div>
-
             {studentHistory?.sessions?.length === 0 && (
               <p style={{ color: 'var(--muted)', fontSize: 14 }}>No chat sessions yet.</p>
             )}
-
             {studentHistory?.sessions?.map(s => (
               <div key={s.session_id} style={{
                 border: '1px solid var(--border)', borderRadius: 12,
@@ -400,6 +483,105 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit student modal */}
+      {editStudent && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+          padding: 24,
+        }}>
+          <div style={{
+            background: 'white', borderRadius: 16, width: '100%', maxWidth: 480,
+            padding: '28px', border: '1px solid var(--border)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 20 }}>
+                Edit student
+              </h3>
+              <button onClick={() => setEditStudent(null)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: 20,
+              }}>×</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 5 }}>Full name</label>
+                <input
+                  value={editForm.full_name}
+                  onChange={e => setEditForm(f => ({ ...f, full_name: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 5 }}>Phone</label>
+                <input
+                  value={editForm.phone}
+                  onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
+                  placeholder="+91 9876543210"
+                  style={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 5 }}>Department</label>
+                <select
+                  value={editForm.department}
+                  onChange={e => setEditForm(f => ({ ...f, department: e.target.value }))}
+                  style={inputStyle}
+                >
+                  <option value="">Select department</option>
+                  {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 5 }}>Year of study</label>
+                <select
+                  value={editForm.year_of_study}
+                  onChange={e => setEditForm(f => ({ ...f, year_of_study: e.target.value }))}
+                  style={inputStyle}
+                >
+                  <option value="">Select year</option>
+                  {['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year', 'Postgraduate'].map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input
+                  type="checkbox"
+                  id="is_active_edit"
+                  checked={editForm.is_active}
+                  onChange={e => setEditForm(f => ({ ...f, is_active: e.target.checked }))}
+                />
+                <label htmlFor="is_active_edit" style={{ fontSize: 13, fontWeight: 500 }}>
+                  Account active
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button onClick={saveEdit} disabled={editLoading} style={{
+                  flex: 1, padding: '10px', borderRadius: 8,
+                  background: 'var(--sage-dark)', color: 'white',
+                  border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                }}>
+                  {editLoading ? 'Saving...' : 'Save changes'}
+                </button>
+                <button onClick={() => setEditStudent(null)} style={{
+                  flex: 1, padding: '10px', borderRadius: 8,
+                  background: 'white', color: 'var(--muted)',
+                  border: '1px solid var(--border)', cursor: 'pointer', fontSize: 13,
+                }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

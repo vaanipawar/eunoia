@@ -1,4 +1,3 @@
-# backend/app/ml/train_model.py
 import pandas as pd
 import numpy as np
 import joblib, os
@@ -47,7 +46,6 @@ def train():
     print(classification_report(y_test, y_pred))
     print(f"ROC-AUC Score: {roc_auc_score(y_test, y_prob):.4f}")
 
-    # Feature importance
     model = pipeline.named_steps["model"]
     importance = dict(zip(FEATURES, model.feature_importances_))
     importance = dict(sorted(importance.items(), key=lambda x: x[1], reverse=True))

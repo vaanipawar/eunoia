@@ -10,8 +10,56 @@ const SPECIALIZATIONS = [
 ]
 
 const DEPARTMENTS = [
-  'Computer Science', 'Engineering', 'Medicine', 'Law',
-  'Business', 'Arts', 'Science', 'Commerce', 'Design', 'Other'
+  // Engineering branches
+  'Computer Engineering',
+  'Information Technology',
+  'Electronics & Communication Engineering',
+  'Electrical Engineering',
+  'Mechanical Engineering',
+  'Civil Engineering',
+  'Chemical Engineering',
+  'Automobile Engineering',
+  'Aerospace Engineering',
+  'Biomedical Engineering',
+  'Production Engineering',
+  'Instrumentation Engineering',
+  // Computer Applications
+  'BCA - Bachelor of Computer Applications',
+  'MCA - Master of Computer Applications',
+  // Management
+  'MBA - Master of Business Administration',
+  'BBA - Bachelor of Business Administration',
+  // Science
+  'B.Sc Computer Science',
+  'B.Sc Information Technology',
+  'B.Sc Physics',
+  'B.Sc Chemistry',
+  'B.Sc Mathematics',
+  'M.Sc Computer Science',
+  // Humanities & Arts
+  'BA - Bachelor of Arts',
+  'MA - Master of Arts',
+  'BA English',
+  'BA Psychology',
+  'BA Sociology',
+  'BA Economics',
+  // Commerce
+  'B.Com - Bachelor of Commerce',
+  'M.Com - Master of Commerce',
+  // Medicine & Health
+  'MBBS',
+  'BDS - Dental',
+  'B.Pharmacy',
+  'M.Pharmacy',
+  'Nursing',
+  // Law
+  'LLB - Bachelor of Laws',
+  'LLM - Master of Laws',
+  // Design & Architecture
+  'B.Arch - Architecture',
+  'B.Des - Design',
+  // Other
+  'Other',
 ]
 
 export default function Register() {

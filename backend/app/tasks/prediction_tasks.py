@@ -1,4 +1,4 @@
-# backend/app/tasks/prediction_tasks.py
+
 from app.core.celery_app import celery_app
 from app.core.database import SessionLocal
 from app.models.user import User, UserRole
@@ -16,11 +16,11 @@ def run_weekly_predictions():
             User.is_active == True
         ).all()
 
-        # Build feature dicts — in production pull from academic DB
+    
         # Here we use stored survey data or defaults
         student_features = []
         for s in students:
-            # In real app: fetch from academic records table
+            # In real app it fetch from academic records table
             student_features.append({
                 "student_id": str(s.id),
                 "attendance_pct": 75.0,        # replace with real data
