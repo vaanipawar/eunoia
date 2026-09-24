@@ -1,17 +1,12 @@
-export default function RiskBadge({ level, score }) {
-  const config = {
-    low:    { bg: 'var(--green-light)', color: 'var(--green)',  label: 'Low Risk' },
-    medium: { bg: 'var(--amber-light)', color: 'var(--amber)',  label: 'Medium Risk' },
-    high:   { bg: 'var(--red-light)',   color: 'var(--red)',    label: 'High Risk' },
-  }
-  const c = config[level] || config.low
+const LABELS = { low: 'Low risk', medium: 'Medium risk', high: 'High risk' }
+
+export default function RiskBadge({ level = 'low', score }) {
+  const key = LABELS[level] ? level : 'low'
   return (
-    <span style={{
-      background: c.bg, color: c.color,
-      padding: '4px 10px', borderRadius: 20,
-      fontSize: 12, fontWeight: 600,
-    }}>
-      {score !== undefined ? `${score}% · ` : ''}{c.label}
+    <span className={`risk risk-${key}`}>
+      {LABELS[key]}
+      {score !== undefined && <span className="risk-score">{score}%</span>}
     </span>
   )
 }
+

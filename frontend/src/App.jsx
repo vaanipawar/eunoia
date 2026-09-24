@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import PendingApproval from './pages/PendingApproval'
 import StudentDashboard from './pages/StudentDashboard'
 import ChatPage from './pages/ChatPage'
 import SurveyPage from './pages/SurveyPage'
@@ -30,6 +31,7 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/pending-approval" element={<PendingApproval />} />
       <Route path="/" element={<Navigate to={home} replace />} />
       <Route element={<Layout />}>
         <Route path="/dashboard" element={
@@ -51,7 +53,3 @@ export default function App() {
     </Routes>
   )
 }
-import PendingApproval from './pages/PendingApproval'
-
-// Add outside the Layout routes:
-<Route path="/pending-approval" element={<PendingApproval />} />

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/client'
+import AuthShell from '../components/AuthShell'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -12,73 +13,42 @@ export default function ForgotPassword() {
     setLoading(true)
     try {
       await api.post('/api/auth/forgot-password', { email })
-      setSent(true)
     } catch {
-      setSent(true) // show same message to prevent email enumeration
+      // same message either way, so the form can't be used to find out which emails exist
     } finally {
+      setSent(true)
       setLoading(false)
     }
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: 'var(--cream)',
-    }}>
-      <div style={{ width: '100%', maxWidth: 400, padding: '0 24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, color: 'var(--sage-dark)' }}>
-            Eunoia
-          </div>
-        </div>
-        <div style={{
-          background: 'white', borderRadius: 16,
-          border: '1px solid var(--border)', padding: '32px 28px',
-        }}>
-          {sent ? (
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>📧</div>
-              <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 10 }}>Check your email</h2>
-              <p style={{ color: 'var(--muted)', fontSize: 14 }}>
-                If that email exists, we sent a reset link. Check your inbox.
-              </p>
-              <Link to="/login" style={{
-                display: 'inline-block', marginTop: 20, color: 'var(--sage-dark)', fontWeight: 500
-              }}>
-                Back to login
-              </Link>
+    <AuthShell>
+      {sent ? (
+        <>
+          <h1>Check your email</h1>
+          <p className="muted" style={{ marginTop: 6 }}>
+            If an account exists for {email}, we’ve sent a link to reset your password.
+          </p>
+          <div className="auth-links"><Link to="/login">Back to sign in</Link></div>
+        </>
+      ) : (
+        <>
+          <h1>Reset your password</h1>
+          <p className="muted">Enter your email and we’ll send you a reset link.</p>
+          <form onSubmit={handleSubmit} className="stack">
+            <div>
+              <label className="label" htmlFor="email">Email</label>
+              <input id="email" className="field" type="email" autoComplete="email"
+                value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="you@university.edu" required />
             </div>
-          ) : (
-            <>
-              <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Forgot password</h2>
-              <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 20 }}>
-                Enter your email and we'll send a reset link.
-              </p>
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input
-                  type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="you@university.edu" required
-                  style={{
-                    padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)',
-                    fontSize: 14, fontFamily: 'var(--font-sans)', outline: 'none',
-                  }}
-                />
-                <button type="submit" disabled={loading} style={{
-                  padding: '11px', borderRadius: 8, background: 'var(--sage-dark)',
-                  color: 'white', border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                }}>
-                  {loading ? 'Sending…' : 'Send reset link'}
-                </button>
-              </form>
-              <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13 }}>
-                <Link to="/login" style={{ color: 'var(--sage-dark)', fontWeight: 500 }}>
-                  Back to login
-                </Link>
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+            <button type="submit" disabled={loading} className="btn btn-block">
+              {loading ? 'Sending…' : 'Send reset link'}
+            </button>
+          </form>
+          <div className="auth-links"><Link to="/login">Back to sign in</Link></div>
+        </>
+      )}
+    </AuthShell>
   )
 }
